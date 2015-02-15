@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<script src="jquery-1.11.2.min.js"></script>
+<style>
+.container {
+	width: 200px;
+	height: 200px;
+	background: yellow;
+}
+.content {
+	content: '';
+	width: 90%;
+	height: 100%;
+	background: red;
+}
+.content-row {
+	content: '';
+	height: 90%;
+}
+.inline {
+	display: inline-block;
+	*display: inline;
+	zoom: 1;
+}
+.vscrollbar {
+	content: '';
+	width: 20px;
+	height: 100%;
+	background-color: #A0A0A0;
+	float: right;
+	position: relative;
+}
+.hscrollbar {
+	content: '';
+	width: 90%;		/* need adjust */
+	height: 20px;
+	background-color: #A0A0A0;
+}
+.hsbarspace {
+	content: '';
+	width: 160px;	/* = hscrollbar.length - arrow-box.length (20px) */
+	height: 20px;
+	float: right;
+}
+.v-bar-space {
+	content: '';
+	height: 140px; /* adjust it with javascript */
+	top: 2px;
+	position: relative;
+}
+.v-bar-box {
+	content: '';
+	height: 40px;	/* adjust it with javascript */
+	width: 18px;
+	margin-left: auto;
+	margin-right: auto;
+	background-color: #F5F5F5;
+	position: absolute;
+}
+.h-bar-box{
+	content: '';
+	height: 18px;
+	width: 40px;	/* adjust it with javascript */
+	top: 2px;
+	background-color: #F5F5F5;
+}
+.box-released {
+	box-shadow: 1px 1px 0px 1px #C2C2C2;	/* if has trouble with ie6-8, refer to http://www.useragentman.com/blog/2011/08/24/how-to-simulate-css3-box-shadow-in-ie7-8-without-javascript/ */
+}
+.box-pressed {
+	box-shadow: inset 1px 2px 2px 0px #C2C2C2;	/* if has trouble, see above */
+}
+.arrow-box {
+	content: '';
+	width: 18px;
+	height: 18px;
+	background-color: #F5F5F5;
+	position: relative;
+}
+.arrow-box-down {
+	position: absolute;
+	bottom: 0;
+}
+.arrow-box-right {
+	float: right;
+}
+.arrow {
+	position: relative;
+	content: '';
+	width: 0;
+	height: 0;
+	border-style: solid;
+	line-height: 0px;
+	margin-left: auto;
+	margin-right: auto;
+}
+.arrow-up {
+	padding-top: 5px;
+	border-width: 0 5px 8.7px 5px;
+	border-color: transparent transparent #0066ff transparent;
+	_border-color: #000000 #000000 #0066ff #000000;
+	_filter: progid:DXImageTransform.Microsoft.Chroma(color='#000000');
+}
+.arrow-down {
+	top: 5px;
+	border-width: 8.7px 5px 0 5px;
+	border-color: #0066ff transparent transparent transparent;
+	_border-color: #0066ff #000000 #000000 #000000;
+	_filter: progid:DXImageTransform.Microsoft.Chroma(color='#000000');
+}
+.arrow-right {
+	top: 5px;
+	border-width: 5px 0 5px 8.7px;
+	border-color: transparent transparent transparent #0066ff;
+	_border-color: #000000 #000000 #000000 #0066ff;
+	_filter: progid:DXImageTransform.Microsoft.Chroma(color='#000000');
+}
+.arrow-left {
+	top: 5px;
+	border-width: 5px 8.7px 5px 0;
+	border-color: transparent #0066ff transparent transparent;
+	_border-color: #000000 #0066ff #000000 #000000;
+	_filter: progid:DXImageTransform.Microsoft.Chroma(color='#000000'); 
+}
+</style>
+<script type="text/javascript">
+	$( document ).ready( function() {
+		$(".arrow-box")
+		.mousedown(function(){
+			$(this).removeClass("box-released");
+			$(this).addClass("box-pressed");
+		})
+		.mouseup(function(){
+			$(this).removeClass("box-pressed");
+			$(this).addClass("box-released");
+		})
+		.mouseleave(function() {
+			$(this).removeClass("box-pressed");
+			$(this).addClass("box-released");
+		})
+		// mouse up/down just for box redrawing, click for business processing
+		.click(function() {
+			// TODO: use arrow-box-up/down/left/right class to identify the respective box and do what you want.
+		});
+		
+		$(".v-bar-box")
+		.mousedown(function(e) {
+			$(this).data("is_dragging", true);
+			$(this).data("drag_start_y", e.pageY);
+			$(this).data("bar_space_height", $(".v-bar-space").height());
+			$(this).mousemove(function(e) {
+				drag_v_scrollbar($(this), e);
+			});
+		})
+		.mouseup(function(e) {
+			if (!$(this).data("is_dragging")) {
+				return;
+			}
+			$(this).unbind("mousemove");
+			drag_v_scrollbar($(this), e);
+		})
+		.mouseleave(function(e) {
+			if (!$(this).data("is_dragging")) {
+				return;
+			}
+			$(this).unbind("mousemove");
+			drag_v_scrollbar($(this), e);
+		});
+		
+		function drag_v_scrollbar(barbox, eventArgs) {
+			var distance = eventArgs.pageY - barbox.data("drag_start_y");
+			if (0 < distance && barbox.data("bar_space_height") > barbox.position().top + barbox.height() + 1) { // leave one pixel space
+				barbox.css("top", barbox.position().top + distance + "px");
+				// do business processing here.
+			}
+		}
+	} )
+</script>
+</head>
+<body>
+<div class="container">
+	<div class="content-row">
+		<div class="content inline">
+		hello<br>world
+		</div>
+		<div class="vscrollbar">
+			<!-- arrow-box-up here is just for click event handler to get this element exactly -->
+			<div class="arrow-box arrow-box-up box-released">
+				<div class="arrow arrow-up"></div>
+			</div>
+			<div class="v-bar-space">
+				<div class="v-bar-box"></div>
+			</div>
+			<!-- arrow-box-down here is just for click event handler to get this element exactly -->
+			<div class="arrow-box arrow-box-down box-released">
+				<div class="arrow arrow-down"></div>
+			</div>
+		</div>
+	</div>
+	<div class="hscrollbar">
+		<!-- arrow-box-left here is just for click event handler to get this element exactly -->
+		<div class="inline arrow-box arrow-box-left box-released">
+			<div class="arrow arrow-left"></div>
+		</div>
+		<div class="hsbarspace inline">
+			<div class="h-bar-box inline"></div>
+			<!-- arrow-box-right here is just for click event handler to get this element exactly -->
+			<div class="arrow-box arrow-box-right box-released">
+				<div class="arrow arrow-right"></div>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+</html>
